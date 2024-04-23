@@ -50,7 +50,7 @@ void displayMenu() {
     printf("5. Luu thong tin vao file\n");
     printf("6. Exit\n");
     printf("===============================================\n");
-    printf("Enter your choice: ");
+    printf("Nhap lua chon cua ban: ");
 }
 
 void addSeat() {

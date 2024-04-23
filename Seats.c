@@ -2,82 +2,152 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_FLIGHTS 10
 #define MAX_SEATS 100
-#define MAX_NAME_LENGTH 50
 
-typedef struct {
-    int id;
-    char name[MAX_NAME_LENGTH];
+struct Seat {
+    int seatNumber;
+    int flightNumber;
     int booked;
-} Seat;
+};
 
-typedef struct {
-    int id;
-    char name[MAX_NAME_LENGTH];
-    int numSeats;
-    Seat seats[MAX_SEATS];
-} Flight;
+struct Seat seats[MAX_SEATS];
+int numSeats = 0;
 
-Flight flights[MAX_FLIGHTS];
-int numFlights = 0;
-
-void createFlight() {
-    if (numFlights >= MAX_FLIGHTS) {
-        printf("Khong the tao them chuyen bay. Da qua gioi han.\n");
+void saveToFile() {
+    FILE *file = fopen("seats.txt", "w");
+    if (file == NULL) {
+        printf("Khong mo duoc file de ghi.\n");
         return;
     }
-    Flight newFlight;
-    printf("Nhap ID chuyen bay: ");
-    scanf("%d", &newFlight.id);
-    printf("Nhap ten chuyen bay: ");
-    scanf("%s", newFlight.name);
-    printf("Nhap so ghe: ");
-    scanf("%d", &newFlight.numSeats);
 
-    int i;
-    for (i = 0; i < newFlight.numSeats; i++) {
-        newFlight.seats[i].id = i + 1;
-        strcpy(newFlight.seats[i].name, "Co san");
-        newFlight.seats[i].booked = 0;
+    for (int i = 0; i < numSeats; i++) {
+        fprintf(file, "%d %d %d\n", seats[i].seatNumber, seats[i].flightNumber, seats[i].booked);
     }
 
-    flights[numFlights++] = newFlight;
-    printf("Tao chuyen bay thanh cong.\n");
+    fclose(file);
 }
 
-void displayFlights() {
-    printf("Chuyen bay:\n");
-    int i;
-    for (i = 0; i < numFlights; i++) {
-        printf("ID: %d, Ten: %s, Ghe ngoi: %d\n", flights[i].id, flights[i].name, flights[i].numSeats);
+void loadFromFile() {
+    FILE *file = fopen("seats.txt", "r");
+    if (file == NULL) {
+        printf("File khong ton tai hoac khong mo duoc.\n");
+        return;
     }
+
+    while (fscanf(file, "%d %d %d", &seats[numSeats].seatNumber, &seats[numSeats].flightNumber, &seats[numSeats].booked) != EOF) {
+        numSeats++;
+    }
+
+    fclose(file);
+}
+
+void displayMenu() {
+    printf("\n======= Airplane Seat Management System =======\n");
+    printf("1. Them cho ngoi\n");
+    printf("2. Xoa cho ngoi\n");
+    printf("3. Chinh sua thong tin cho ngoi\n");
+    printf("4. Hien thi het cho ngoi\n");
+    printf("5. Luu thong tin vao file\n");
+    printf("6. Exit\n");
+    printf("===============================================\n");
+    printf("Enter your choice: ");
+}
+
+void addSeat() {
+    if (numSeats >= MAX_SEATS) {
+        printf("Chuyen bay da dat den gioi han cho ngoi.\n");
+        return;
+    }
+
+    printf("Nhap so ghe ngoi: ");
+    scanf("%d", &seats[numSeats].seatNumber);
+    printf("Nhap so chuyen bay: ");
+    scanf("%d", &seats[numSeats].flightNumber);
+    seats[numSeats].booked = 0; //Khoi tao khong duoc dat ve
+    numSeats++;
+    printf("Cho ngoi da duoc them thanh cong.\n");
+}
+
+void deleteSeat() {
+    int seatNum, i;
+    printf("Nhap ghe ngoi de xoa: ");
+    scanf("%d", &seatNum);
+
+    for (i = 0; i < numSeats; i++) {
+        if (seats[i].seatNumber == seatNum) {
+            for (int j = i; j < numSeats - 1; j++) {
+                seats[j] = seats[j + 1];
+            }
+            numSeats--;
+            printf("Ghe ngoi xoa thanh cong.\n");
+            return;
+        }
+    }
+
+    printf("Ghe ngoi khong tim thay duoc.\n");
+}
+
+void editSeat() {
+    int seatNum, i;
+    printf("Nhap so ghe ngoi de chinh sua: ");
+    scanf("%d", &seatNum);
+
+    for (i = 0; i < numSeats; i++) {
+        if (seats[i].seatNumber == seatNum) {
+            printf("Nhap ghe ngoi moi: ");
+            scanf("%d", &seats[i].seatNumber);
+            printf("Nhap chuyen bay moi: ");
+            scanf("%d", &seats[i].flightNumber);
+            printf("Thong tin cua ghe ngoi duoc cap nhat thanh cong.\n");
+            return;
+        }
+    }
+
+    printf("Ghe ngoi .\n");
+}
+
+void displaySeats() {
+    printf("\n=== Danh sach ghe ngoi ===\n");
+    printf("So cho ngoi.\tSo chuyen bay.\tTinh trang dat ve\n");
+    for (int i = 0; i < numSeats; i++) {
+        printf("%d\t\t%d\t\t%s\n", seats[i].seatNumber, seats[i].flightNumber, seats[i].booked ? "Co" : "Khong");
+    }
+    printf("====================\n");
 }
 
 int main() {
     int choice;
+
+    loadFromFile(); 
+
     do {
-        printf("\n1. Tao chuyen bay\n");
-        printf("2. Hien chuyen bay\n");
-        printf("3. Thoat\n");
-        printf("Chon: ");
+        displayMenu();
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                createFlight();
+                addSeat();
                 break;
             case 2:
-                displayFlights();
+                deleteSeat();
                 break;
             case 3:
-                printf("Thoat chuong trinh.\n");
+                editSeat();
+                break;
+            case 4:
+                displaySeats();
+                break;
+            case 5:
+                saveToFile();
+                printf("Du lieu da duoc luu vao file.\n");
+                break;
+            case 6:
+                printf("Dang thoat...\n");
                 break;
             default:
-                printf("Lua chon khong hop le. Nhap lai lan nua.\n");
+                printf("Du lieu khong hop le. Vui long nhap so tu 1 den 6.\n");
         }
-    } while (choice != 3);
+    } while (choice != 6);
 
     return 0;
 }
-

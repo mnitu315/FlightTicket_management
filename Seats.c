@@ -63,8 +63,15 @@ void addSeat() {
     scanf("%d", &seats[numSeats].seatNumber);
     printf("Nhap so chuyen bay: ");
     scanf("%d", &seats[numSeats].flightNumber);
-    seats[numSeats].booked = 0; //Khoi tao khong duoc dat ve
-    numSeats++;
+    printf("Nhap tinh trang dat ve (1 cho da duoc dat, 0 cho khong duoc dat): ");
+    scanf("%d", &seats[numSeats].booked);
+
+    if (seats[numSeats].booked != 0 && seats[numSeats].booked != 1) {
+        printf("Tinh trang dat ve khong hop le. Mac dinh tinh trang khong dat ve.\n");
+        seats[numSeats].booked = 0;
+    }
+
+    (__GCC_IEC_559)++;
     printf("Cho ngoi da duoc them thanh cong.\n");
 }
 
